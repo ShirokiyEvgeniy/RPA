@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://web-harvest.sourceforge.net/schema/1.0/config" scriptlang="groovy">
+
+	<create-datastore name="ds_name">
+        <datastore-column name="name"/>
+        <datastore-column name="surname"/>
+        <datastore-column name="birth_date"/>
+        <datastore-column name="sex"/>
+        <datastore-column name="height"/>
+    </create-datastore>
+
+	<var-def name="name" />
+	<var-def name="surname" />
+	<var-def name="date" />
+	<var-def name="sex" />
+	<var-def name="height" />
+	
+	<var-def name="fakePersons">
+		<json>
+   			<http-extended url="https://uinames.com/api/?amount=5" method="GET" charset="UTF-8" />
+   		</json>
+   	</var-def>
+
+	<while condition="true" maxloops="5" index="i" empty="false">
+		<script><![CDATA[ 
+			import groovy.time.TimeCategory
+   			
+   			def name = fakePersons.get(0).getWrappedObject().get(i.toInt() - 1).get("name").toString().replaceAll("\"", "")
+   			def surname = fakePersons.get(0).getWrappedObject().get(i.toInt() - 1).get("surname").toString().replaceAll("\"", "")
+   			sys.defineVariable("name", name)
+   			sys.defineVariable("surname", surname)	
+			println name
+			println surname
+			def start = Date.parse('yyyy-MM-dd', '1950-01-01')
+			def end = Date.parse('yyyy-MM-dd', '1999-01-01')
+			def date = (start..end).toList().get(new Random().nextInt(49*365))
+			sys.defineVariable("date", date.getDateString())
+			println date
+			def mf = ["M", "F"]
+			def mfList = mf.toList()
+			Collections.shuffle(mfList)
+			def sex = mfList.get(0)
+			sys.defineVariable("sex", sex)
+			println sex
+			def hList = (140..200).toList()
+			Collections.shuffle(hList)
+			def height = hList.get(0)
+			sys.defineVariable("height", height)
+   			println height
+  	 		com.freedomoss.crowdcontrol.webharvest.plugin.datastore.dto.DataStoreRow row = new com.freedomoss.crowdcontrol.webharvest.plugin.datastore.dto.DataStoreRow();
+    	    row.addValue("name", com.freedomoss.crowdcontrol.webharvest.plugin.datastore.enums.DataStoreColumnType.TEXT, name);
+        	row.addValue("surname", com.freedomoss.crowdcontrol.webharvest.plugin.datastore.enums.DataStoreColumnType.TEXT, surname);
+ 	      	row.addValue("birth_date", com.freedomoss.crowdcontrol.webharvest.plugin.datastore.enums.DataStoreColumnType.DATE, date, 'yyyy-MM-dd');
+    	    row.addValue("sex", com.freedomoss.crowdcontrol.webharvest.plugin.datastore.enums.DataStoreColumnType.TEXT, sex);
+    	    row.addValue("height", com.freedomoss.crowdcontrol.webharvest.plugin.datastore.enums.DataStoreColumnType.INTEGER, height);
+        	com.google.gson.Gson gson = new com.google.gson.GsonBuilder()
+            	    .setDateFormat('yyyy-MM-dd').create();
+     	    jsonValue = gson.toJson(row);
+   		]]></script>
+   		 <insert-datastore datastore-name="ds_name" json-value-map="${jsonValue}"/>
+   		
+	</while>
+
+    <export include-original-data="false">
+    	<single-column name="ds_name" value="ds_name" />
+    </export>
+
+</config>

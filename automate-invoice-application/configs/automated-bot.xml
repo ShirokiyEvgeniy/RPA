@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://web-harvest.sourceforge.net/schema/1.0/config" scriptlang="groovy">
+
+	<script><![CDATA[ 
+		listOfInvoices = new ArrayList()
+	]]></script>
+
+	<robotics-flow>
+		<robot name="roboticsDriver" driver="chrome" close-on-completion="true" start-in-private="true">
+			<script><![CDATA[
+				timeouts(40 * 1000);
+				open("https://train-invoiceplane.workfusion.com")
+				$(byId("email")).val("wf-robot@mail.com")
+				$(byId("password")).val("BotsRock4ever!")
+				$(byAttribute('type','submit')).click()
+			]]></script>
+			<loop item="invoice">
+				<list>
+					<datastore name="invoices">
+						select * from @this
+					</datastore>
+				</list>
+				<body>
+					<var-def name="products">
+						<datastore name="products">
+							<template>select * from @this where invoice_id = '${invoice.get("invoice_id").toString()}'</template>
+						</datastore>
+					</var-def>
+					<script><![CDATA[ 
+						open("https://train-invoiceplane.workfusion.com")
+						$(byXpath("//a[contains(@class, \"create-invoice\")]/span")).waitUntil(VISIBLE).click()
+						$(byId("client_name")).waitUntil(VISIBLE).selectOption(invoice.get("client").toString())
+						$(byId("invoice_group_id")).selectOption(invoice.get("group"))
+						$(byId("invoice_create_confirm")).click()
+						
+						def tbodyXpath = "//table[@id='item_table']/tbody[contains(@class, \"item\")]"
+						for (int i = 0; i < products.size(); i++) {
+							$(byXpath("//a[contains(@class, \"btn_add_row\")]")).waitUntil(VISIBLE).click()
+							$(byXpath("${tbodyXpath}[${i+1}]//input[@name='item_name']")).val(products.get(i).get("title").toString())
+							$(byXpath("${tbodyXpath}[${i+1}]//input[@name='item_quantity']")).val(products.get(i).get("quantity").toString())
+							$(byXpath("${tbodyXpath}[${i+1}]//input[@name='item_price']")).val(products.get(i).get("price").toString())
+							$(byXpath("${tbodyXpath}[${i+1}]//textarea[@name='item_description']")).val(products.get(i).get("description").toString())
+							$(byXpath("${tbodyXpath}[${i+1}]//input[@name='item_discount_amount']")).val(products.get(i).get("discount").toString())
+						}
+						$(byId("invoice_discount_percent")).val(invoice.get("discount_percent").toString())
+						$(byId("payment_method")).selectOption(invoice.get("payment_method").toString())
+						$(byId("invoice_terms")).val(invoice.get("invoice_terms").toString())
+						
+						screen = driver().getScreenshotAs(OutputType.BYTES)
+					]]></script>
+					
+					<var-def name="screenLink">
+				        <s3 bucket='wf-vr-training'>
+				            <s3-put path="YauheniShyroki/${'invoice' + invoice.get('invoice_id') + ' ' + new java.util.Date().toString() + '.png'}"  acl="PublicRead">
+				                <script return="screen"/>
+				            </s3-put>
+				        </s3>
+				    </var-def>
+				    
+				    <script><![CDATA[ 
+				    	listOfInvoices.add(new HashMap().put("screenLink", screenLink))
+				    ]]></script>
+				</body>
+			</loop>
+		</robot>
+	</robotics-flow>
+
+	<var-def name="screenLink">
+        <s3 bucket='wf-vr-training'>
+            <s3-put path="YauheniShyroki/${'screenshot' + new java.util.Date().toString() + '.png'}"  acl="PublicRead">
+                <script return="screen"/>
+            </s3-put>
+        </s3>
+    </var-def>
+
+	<export include-original-data="false">
+		<multi-column list="${listOfInvoices}" split-results="true">
+			<put-to-column-getter name="screenLink" property="screenLink" />
+		</multi-column>
+	</export>
+
+</config>

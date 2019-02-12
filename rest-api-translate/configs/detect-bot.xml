@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://web-harvest.sourceforge.net/schema/1.0/config" scriptlang="groovy">
+
+	<var-def name="lang"></var-def>
+
+	<var-def name="api_detect_response">
+		<json>
+       		<http-extended url="https://api.cognitive.microsofttranslator.com/detect?api-version=3.0&amp;Subscription-Key=83ffa3bd24bf4f75aa0814c3713bd0d4" content-type="application/json" method="POST" charset="UTF-8">
+           		<template>[{'Text': '${phrase}'}]</template>
+       		</http-extended>
+   		</json>
+   	</var-def>
+   	<var-def name="langJSON">
+   		<json expression="$..language">
+       		<var name="api_detect_response"/>
+   		</json>
+	</var-def>
+	<script><![CDATA[ 
+   		sys.defineVariable("lang", langJSON.get(0).getWrappedObject().get(0).toString().replace("\"", ""));
+		
+    	println phrase;
+   		println lang;
+   		
+   	]]></script>
+		
+	<export include-original-data="false">
+		<single-column name="language" value="lang">
+		</single-column>
+	</export>
+
+</config>

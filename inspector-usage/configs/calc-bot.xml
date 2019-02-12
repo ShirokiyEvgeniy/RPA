@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://web-harvest.sourceforge.net/schema/1.0/config" scriptlang="groovy">
+
+
+	<robotics-flow>
+		<robot name="roboticsDriver" driver="chrome" close-on-completion="false" start-in-private="true">
+			<script><![CDATA[
+				timeouts(40 * 1000);
+				open("https://train-invoiceplane.workfusion.com")
+				$(byId("email")).val("wf-robot@mail.com")
+				$(byId("password")).val("BotsRock4ever!")
+				$(byAttribute('type','submit')).click()
+				
+				$(byText("Reports")).waitUntil(VISIBLE).click()
+				$(byText("Invoice Aging")).waitUntil(VISIBLE).click()
+				
+				$(byXpath("//input[@type = 'submit']")).waitUntil(VISIBLE).click()
+				
+				$(byId("plugin"))
+				sendKeys(Keys.chord(Keys.LEFT_CONTROL, 's'))
+			]]></script>
+		</robot>
+		
+		<robot name="desktopDriver" driver="desktop" close-on-completion="true" start-in-private="true">
+			<script><![CDATA[ 
+				window("[TITLE:Сохранение]")
+				$("[CLASS:Button; NAME:Предыдущие расположения]").click()
+				editPath = $("[CLASS:Edit; NAME:Адрес]")
+				editPath.clear()
+				editPath.sendKeys("C:/RPA/")
+				sendKeys(Keys.ENTER)
+				saveButton = $("[CLASS:Button; NAME:Сохранить]")
+				saveButton.click()
+				try {
+					Thread.sleep(3000)
+				} catch (Exception e) {
+					e.printStackTrace()
+				}
+				resultFile = downloadFileFromAgent("C:/RPA/Invoice Aging.pdf")
+				deleteFileOnAgent("C:/RPA/Invoice Aging.pdf")
+			]]></script>
+		</robot>
+	</robotics-flow>
+
+	<var-def name="s3Link">
+		<s3 bucket="wf-vr-training">
+			<s3-put path="YauheniShyroki/${'invoice aging ' + new java.util.Date().toString() + '.pdf'}" content-type="application/pdf" acl="PublicRead">
+				<script return="resultFile" />
+			</s3-put>
+		</s3>
+	</var-def>
+
+    <export include-original-data="false">
+    	<single-column name="s3Link" value="${s3Link}" />
+    </export>
+
+</config>

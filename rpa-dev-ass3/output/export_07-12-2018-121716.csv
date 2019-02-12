@@ -1,0 +1,57 @@
+"name","rank","type","link"
+"Company, Boumba-et-Ngoko, East, Cameroon
+Company, Bords et Val de Seine / Les Arches, Issy-les-Moulineaux, Boulogne-Billancourt, Hauts-de-Seine, Ile-de-France, Metropolitan France, 92130, France
+Company, Brownview, Pointe Coupee Parish, Louisiana, 70759, USA
+Company, Río Tercero, Departamento Tercero Arriba, Córdoba, X5850, Argentina
+Company, Prospect Row, Petersfield, Cambridge, Cambridgeshire, East of England, England, CB1 1DU, United Kingdom
+The Company, Park Boulevard, North Park, Mission Valley, San Diego, San Diego County, California, 92103-3609, USA
+Company, Diag. 80, Barrio Hipódromo, La Plata, Partido de La Plata, Buenos Aires, 1902, Argentina
+Company, Via Enrico Barelli, San Carlo, Crema, CR, Lombardy, 26013, Italy
+The Company, Southwest 153rd Street, Burien, King County, Washington, 98148-1014, USA
+Company, Via Cendrole, Riese Pio X, TV, Veneto, 31039, Italy","19
+24
+26
+26
+30
+30
+30
+30
+30
+30","village
+park
+residential
+residential
+hairdresser
+hairdresser
+yes
+bar
+hairdresser
+bar","https://us1.locationiq.com/v1/search.php?q=${company}&format=xml&key=f3395b671ec2b0"
+"Company, Boumba-et-Ngoko, East, Cameroon
+Company, Bords et Val de Seine / Les Arches, Issy-les-Moulineaux, Boulogne-Billancourt, Hauts-de-Seine, Ile-de-France, Metropolitan France, 92130, France
+Company, Brownview, Pointe Coupee Parish, Louisiana, 70759, USA
+Company, Río Tercero, Departamento Tercero Arriba, Córdoba, X5850, Argentina
+Company, Prospect Row, Petersfield, Cambridge, Cambridgeshire, East of England, England, CB1 1DU, United Kingdom
+The Company, Park Boulevard, North Park, Mission Valley, San Diego, San Diego County, California, 92103-3609, USA
+Company, Diag. 80, Barrio Hipódromo, La Plata, Partido de La Plata, Buenos Aires, 1902, Argentina
+Company, Via Enrico Barelli, San Carlo, Crema, CR, Lombardy, 26013, Italy
+The Company, Southwest 153rd Street, Burien, King County, Washington, 98148-1014, USA
+Company, Via Cendrole, Riese Pio X, TV, Veneto, 31039, Italy","19
+24
+26
+26
+30
+30
+30
+30
+30
+30","village
+park
+residential
+residential
+hairdresser
+hairdresser
+yes
+bar
+hairdresser
+bar","https://us1.locationiq.com/v1/search.php?q=${company}&format=xml&key=f3395b671ec2b0"

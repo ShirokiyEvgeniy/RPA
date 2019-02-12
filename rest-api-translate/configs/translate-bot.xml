@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://web-harvest.sourceforge.net/schema/1.0/config" scriptlang="groovy">
+
+	<var-def name="lang"></var-def>
+
+	<script><![CDATA[ 
+		listOfResult = new ArrayList();
+	]]></script>
+
+			<file path="E:\\workfusion-workspace\\rest-api-translate\\input\\lang.csv" />
+		
+			<script><![CDATA[ 
+				lang = language.get(i - 1);
+			]]></script>
+    		<var-def name="api_translate_response">
+    			<http-extended url="https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&amp;Subscription-Key=83ffa3bd24bf4f75aa0814c3713bd0d4&amp;from=${lang}&amp;to=en" content-type="application/json" method="POST" charset="UTF-8">
+            		<template>[{'Text': '${phrase}'}]</template>
+        		</http-extended>
+    		</var-def>
+    		
+    		<script><![CDATA[ 
+    			println api_translate_response;
+    			Map exportMap = new HashMap();
+    			exportMap.put("initialString", phrase);
+    			exportMap.put("lang", lang);
+    			exportMap.put("translatedString", api_translate_response);
+    			listOfResult.add(exportMap);
+    		]]></script>
+	
+
+	<export include-original-data="true">
+		<multi-column list="${listOfResult}" split-results="true">
+			<put-to-column-getter name="initialString" property="initialString" />
+			<put-to-column-getter name="lang" property="lang" />
+			<put-to-column-getter name="translatedString" property="translatedString" />
+		</multi-column>
+	</export>
+
+</config>

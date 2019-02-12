@@ -1,0 +1,3 @@
+"name","rank","type","link"
+"Epam, 101, East 8th Avenue, Conshohocken, Montgomery County, Pennsylvania, 19428, USA","30","company","https://us1.locationiq.com/v1/search.php?q=epam&limit=1&format=xml&key=f3395b671ec2b0"
+"WorkFusion, 11, улица Славинского, Uschod, Pyershamayski District, Minsk, 220086, Belarus","30","company","https://us1.locationiq.com/v1/search.php?q=workfusion&limit=1&format=xml&key=f3395b671ec2b0"

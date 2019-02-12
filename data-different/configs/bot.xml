@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://web-harvest.sourceforge.net/schema/1.0/config" scriptlang="groovy">
+
+	<var-def name="goldData">
+		<datastore name="ML_Basics_3_goldset">
+			select * from @this
+		</datastore>
+	</var-def>
+	
+	<var-def name="extrData">
+		<datastore name="ML_Basics_3_extracted">
+			select * from @this
+		</datastore>
+	</var-def>
+	
+	<script><![CDATA[
+		TPname = new ArrayList()
+		TPage = new ArrayList()
+		TPprofession = new ArrayList()
+		TPcity = new ArrayList()
+		
+		FNname = new ArrayList()
+		FNage = new ArrayList()
+		FNprofession = new ArrayList()
+		FNcity = new ArrayList()
+		
+		FPFNname = new ArrayList()
+		FPFNage = new ArrayList()
+		FPFNprofession = new ArrayList()
+		FPFNcity = new ArrayList()
+	]]></script>
+	
+	<while condition="true" maxloops="150" index="i">
+		<script><![CDATA[ 
+			if (goldData.get(i.toInt() - 1).get("name").toString().equals(extrData.get(i.toInt() - 1).get("name").toString())) {
+				TPname.add(extrData.get(i.toInt() - 1).get("name"))
+			} else if (extrData.get(i.toInt() - 1).get("name").isEmpty()) {
+				FNname.add(extrData.get(i.toInt() - 1).get("name"))
+			} else if (!goldData.get(i.toInt() - 1).get("name").toString().equals(extrData.get(i.toInt() - 1).get("name").toString())) {
+				FPFNname.add(extrData.get(i.toInt() - 1).get("name"))
+			}
+			
+			if (goldData.get(i.toInt() - 1).get("age").toString().equals(extrData.get(i.toInt() - 1).get("age").toString())) {
+				TPage.add(extrData.get(i.toInt() - 1).get("age"))
+			} else if (extrData.get(i.toInt() - 1).get("age").isEmpty()) {
+				FNage.add(extrData.get(i.toInt() - 1).get("age"))
+			} else if (!goldData.get(i.toInt() - 1).get("age").toString().equals(extrData.get(i.toInt() - 1).get("age").toString())) {
+				FPFNage.add(extrData.get(i.toInt() - 1).get("age"))
+			}
+			
+			if (goldData.get(i.toInt() - 1).get("profession").toString().equals(extrData.get(i.toInt() - 1).get("profession").toString())) {
+				TPprofession.add(extrData.get(i.toInt() - 1).get("profession"))
+			} else if (extrData.get(i.toInt() - 1).get("profession").isEmpty()) {
+				FNprofession.add(extrData.get(i.toInt() - 1).get("profession"))
+			} else if (!goldData.get(i.toInt() - 1).get("profession").toString().equals(extrData.get(i.toInt() - 1).get("profession").toString())) {
+				FPFNprofession.add(extrData.get(i.toInt() - 1).get("profession"))
+			}
+			
+			if (goldData.get(i.toInt() - 1).get("city").toString().equals(extrData.get(i.toInt() - 1).get("city").toString())) {
+				TPcity.add(extrData.get(i.toInt() - 1).get("city"))
+			} else if (extrData.get(i.toInt() - 1).get("city").isEmpty()) {
+				FNcity.add(extrData.get(i.toInt() - 1).get("city"))
+			} else if (!goldData.get(i.toInt() - 1).get("city").toString().equals(extrData.get(i.toInt() - 1).get("city").toString())) {
+				FPFNcity.add(extrData.get(i.toInt() - 1).get("city"))
+			}
+			]]></script>
+	</while>
+	
+	<script><![CDATA[ 
+		println "TPname: " + TPname.size()
+		println "TPage: " + TPage.size()
+		println "TPprofession: " + TPprofession.size()
+		println "TPcity: " + TPcity.size()
+		
+		println "FNname: " + FNname.size()
+		println "FNage: " + FNage.size()
+		println "FNprofession: " + FNprofession.size()
+		println "FNcity: " + FNcity.size()
+		
+		println "FPFNname: " + FPFNname.size()
+		println "FPFNage: " + FPFNage.size()
+		println "FPFNprofession: " + FPFNprofession.size()
+		println "FPFNcity: " + FPFNcity.size()
+	]]></script>
+
+    <export include-original-data="false"></export>
+
+</config>

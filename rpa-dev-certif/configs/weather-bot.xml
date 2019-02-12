@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://web-harvest.sourceforge.net/schema/1.0/config" scriptlang="groovy">
+
+	<script><![CDATA[ 
+		result = new ArrayList()
+	]]></script>
+
+	<var-def name="JsonCities">
+		<json>
+			<http url="http://db1.epmc-iacc.projects.epam.com:8080/wf-vr-training/temp.bucket/YauheniShyroki/cities.json" />
+		</json>
+	</var-def>
+
+	<script><![CDATA[			
+		def slurper = new groovy.json.JsonSlurper()
+ 		def cities = slurper.parseText(JsonCities.toString())
+  		Collections.sort(cities, new Comparator() {
+  			int compare(c1, c2) {
+  				return Integer.parseInt(c2.population).compareTo(Integer.parseInt(c1.population))
+  			}
+  		});
+  		sys.defineVariable("cities", cities) 		
+	]]></script>
+	
+	<while condition="true" index="i" maxloops="200">
+		<var-def name="JsonResponse">
+			<json>
+				<http url="https://api.openweathermap.org/data/2.5/find?lat=${cities.getWrappedObject()[i.toInt() - 1].getWrappedObject().latitude}&amp;lon=${cities.getWrappedObject()[i.toInt() - 1].getWrappedObject().longitude}&amp;cnt=1&amp;appid=6fbf3ecad532062c702c114fb5e9a5a2" />
+			</json>
+		</var-def>
+	
+		<script><![CDATA[
+			import java.math.RoundingMode;
+			import java.math.BigDecimal;
+			import com.google.gson.Gson
+			import com.google.gson.GsonBuilder
+			def slurper = new groovy.json.JsonSlurper()
+ 			def response = slurper.parseText(JsonResponse.toString())
+ 			
+ 			Map map = new HashMap()
+ 			println "-------------${i}----------------"
+ 			
+ 			map.put("Time of response", sys.datetime("EEE, dd MMM yyyy HH:mm:ss zzz"))
+ 			map.put("Temperature in Celsius", String.format("%.2f", ((Double)response.list[0].main.temp - 273.15)))
+ 			map.put("Pressure in hPa", Integer.toString(response.list[0].main.pressure))
+ 			map.put("Humidity in %", Integer.toString(response.list[0].main.humidity))
+ 			map.put("Wind speed in meter/sec", response.list[0].wind.speed.toString())
+ 			map.put("City", cities.getWrappedObject()[i.toInt() - 1].getWrappedObject().city)
+ 			map.put("Longitude", cities.getWrappedObject()[i.toInt() - 1].getWrappedObject().longitude.toString())
+ 			map.put("Latitude", cities.getWrappedObject()[i.toInt() - 1].getWrappedObject().latitude.toString())
+ 			map.put("Population", cities.getWrappedObject()[i.toInt() - 1].getWrappedObject().population)
+ 			map.put("State", cities.getWrappedObject()[i.toInt() - 1].getWrappedObject().state)
+ 			
+ 			Gson gson = new GsonBuilder().create()
+			jsonValue = gson.toJson(map)
+			result.add(jsonValue)
+ 			println map
+ 			
+ 			if (i.toInt() % 60 == 0) {
+ 				try {
+					Thread.sleep(60 * 1000)
+				} catch (Exception e) {
+					e.printStackTrace()
+				}
+ 			}
+		]]></script>
+	</while>
+		
+	<var-def name="excelLink">
+		<s3 bucket="wf-vr-training">
+			<s3-put path="temp.bucket/YauheniShyroki/${'weather ' + new java.util.Date().toString() + '.xlsx'}"  acl="PublicRead" content-type="application/vnd.ms-excel">
+                <list-to-excel>
+                	<template>${result.toString()}</template>
+                </list-to-excel>
+            </s3-put>
+		</s3>
+	</var-def>
+
+	<robotics-flow>
+		<robot driver="chrome" close-on-completion="false" maximize-on-startup="true" name="webDr" start-in-private="true">
+			<script><![CDATA[
+				timeouts(30 * 1000)
+				
+				WebDriverWait wait = new WebDriverWait(driver(), 20)
+				open("https://accounts.google.com/signin/v2/identifier?service=mail&passive=true&rm=false&continue=https%3A%2F%2Fmail.google.com%2Fmail%2F&ss=1&scc=1&ltmpl=default&ltmplcache=2&emr=1&osid=1&flowName=GlifWebSignIn&flowEntry=ServiceLogin")
+				
+				$(byXpath("//input[@type='email']")).waitUntil(VISIBLE).val("test.yauheni.shyroki@gmail.com")
+				$(byXpath("//div[@id='identifierNext']")).click()
+				$(byXpath("//input[@type='password']")).waitUntil(VISIBLE)
+				$(byXpath("//input[@type='password']")).val("QWERTYasdfgh1998")
+				$(byXpath("//div[@id='passwordNext']")).click()	
+							
+				sleep(1000)
+				open("https://mail.google.com/mail/u/0/#inbox?compose=new")
+				sleep(2000)
+				
+				$(byXpath("//textarea[@name='to']")).waitUntil(VISIBLE)
+				$(byXpath("//textarea[@name='to']")).val("test.yauheni.shyroki@gmail.com")
+				$(byXpath("//input[@name='subjectbox']")).val("RPA Developer, Certification, Yauheni Shyroki")
+				mailBody = $(byXpath("//div[@aria-label='Message Body']"))
+				
+				$(byXpath("//div[@command='Files']")).click()
+							
+			]]></script>
+		</robot>
+		
+		<robot driver="desktop" close-on-completion="false">
+			<script><![CDATA[ 
+				xl = downloadFileOnAgent(excelLink.get(0).toString())
+				window("[TITLE:Открытие]")
+				editPath = $("[CLASS:Edit]")
+				editPath.clear()
+				editPath.sendKeys("${xl}")
+				sendKeys(Keys.ENTER)
+				sleep(5000)
+				deleteFileOnAgent("${xl}")
+			]]></script>
+		</robot>
+		
+		<robot driver="chrome" close-on-completion="true" name="webDr">
+			<script><![CDATA[		
+				screen = driver().getScreenshotAs(OutputType.BYTES)
+				$(byXpath("//div[contains(text(), 'Send')]")).click()
+			]]></script>
+			
+			<var-def name="screenLink">
+		        <s3 bucket='wf-vr-training'>
+		            <s3-put path="temp.bucket/YauheniShyroki/${'mailScreen ' + sys.date() + sys.time() + '.png'}"  acl="PublicRead">
+		                <script return="screen"/>
+		            </s3-put>
+		        </s3>
+		    </var-def>
+		</robot>
+	</robotics-flow>
+
+    <export include-original-data="false">
+    	<single-column name="excelLink" value="${excelLink}" />
+    	<single-column name="screenLink" value="${screenLink}" />
+    </export>
+
+</config>

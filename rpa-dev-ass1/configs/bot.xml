@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://web-harvest.sourceforge.net/schema/1.0/config" scriptlang="groovy">
+
+	<required name="name"></required>
+
+	<script><![CDATA[ 
+		Map row = hit_submission_data_item.getWrappedObject().getItemValueMap()
+		sys.defineVariable("row", row)
+		keys = row.keySet().toArray()
+		sys.defineVariable("keys", keys)
+	]]></script>
+
+
+    <export include-original-data="false">
+    	<while condition="true" maxloops="${keys.getWrappedObject().size()}" index="i">
+    		<single-column name="${keys.getWrappedObject()[i.toInt() - 1]}" value="${row.getWrappedObject().get(keys.getWrappedObject()[i.toInt() - 1].toString())}" />
+    	</while>
+    </export>
+
+</config>

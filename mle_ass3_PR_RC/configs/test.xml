@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://web-harvest.sourceforge.net/schema/1.0/config" charset="UTF-8">
+  	<var-def name="result">
+		<datastore name="pr_rc">
+			<template>select * from @this</template>
+		</datastore>
+	</var-def>
+  
+  	<script language="groovy"><![CDATA[ 
+  		println result;
+		TP_res = 0;
+		Extr_res = 0;
+		for (value in result) {
+			TP_res += Integer.parseInt(value.get("tp").toString());
+			Extr_res += Integer.parseInt(value.get("extr").toString());
+		}
+		println TP_res
+		println Extr_res
+		pr = TP_res / Extr_res;
+		re = TP_res / 100;
+		println pr
+		println re
+		sys.defineVariable("pr", pr)
+		sys.defineVariable("re", re)
+	]]></script>
+ 
+	<datastore name="pr_rc">
+		DELETE from @this
+	</datastore>
+  
+	<export include-original-data="false">
+      	<single-column name="precision" value="${pr}" />
+      	<single-column name="recall" value="${re}" />
+	</export>
+</config>

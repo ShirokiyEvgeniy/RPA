@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://web-harvest.sourceforge.net/schema/1.0/config" scriptlang="groovy">
+
+	<required name="company" />
+
+	<var-def name="locationiq_link">
+		<template>https://us1.locationiq.com/v1/search.php?q=${company}&amp;limit=1&amp;format=xml&amp;key=f3395b671ec2b0</template>
+	</var-def>
+
+	<var-def name="locationiq_response">
+		<xml-to-json>
+			<http-extended url="${locationiq_link}" content-type="text/xml" method="GET" charset="UTF-8" />
+		</xml-to-json>
+	</var-def>
+
+	<script><![CDATA[
+		def slurper = new groovy.json.JsonSlurper()
+ 		def result = slurper.parseText(locationiq_response.toString())
+ 		println result.searchresults.place.size()
+ 		println result.toString()
+ 		println locationiq_response
+ 		
+ 		sys.defineVariable("name", result.searchresults.place.display_name)
+ 		sys.defineVariable("rank", result.searchresults.place.place_rank)
+ 		sys.defineVariable("type", result.searchresults.place.type)
+ 		
+	]]></script>
+
+    <export include-original-data="false">
+    	<single-column name="name" value="${name}" />
+    	<single-column name="rank" value="${rank}" />
+    	<single-column name="type" value="${type}" />
+    	<single-column name="link" value="${locationiq_link}" />
+    </export>
+
+</config>

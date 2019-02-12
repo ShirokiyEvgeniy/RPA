@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://web-harvest.sourceforge.net/schema/1.0/config" scriptlang="groovy">
+
+	
+
+	<var-def name="data">
+		<datastore name="in">
+			select * from @this
+		</datastore>
+	</var-def>
+
+	<script><![CDATA[
+		import org.webharvest.runtime.processors.plugins.DbRowVariable
+		import com.freedomoss.crowdcontrol.webharvest.plugin.datastore.dto.DataStoreRow
+		import com.freedomoss.crowdcontrol.webharvest.plugin.datastore.enums.DataStoreColumnType
+		import com.google.gson.Gson
+		import com.google.gson.GsonBuilder
+		
+		resultList = new ArrayList()
+		for (DbRowVariable row in data) {
+			Map map = new HashMap()
+			for (int i = 0; i < row.getColumnCount(); i++) {
+				map.put(row.getColumnName(i), row.get(row.getColumnName(i)).toString())
+			}
+			Gson gson = new GsonBuilder().create()
+			jsonValue = gson.toJson(map)
+			resultList.add(jsonValue)
+		}
+	]]></script>
+
+	<var-def name="s3Link">
+		<s3 bucket="wf-vr-training">
+			<s3-put path="YauheniShyroki/${'assignment2_test ' + new java.util.Date().toString() + '.csv'}"  acl="PublicReadWrite" content-type="text/csv">
+                <list-to-csv>
+                	<template>${resultList.toString()}</template>
+                </list-to-csv>
+            </s3-put>
+		</s3>
+	</var-def>
+
+    <export include-original-data="false">
+    	<single-column name="link" value="${applicationHost}/workfusion/secure/business-process/edit/${item.getWrappedObject().getRun().getRootRunUuid()}" />
+    	<single-column name="s3Link" value="${s3Link}" />
+    </export>
+
+</config>
