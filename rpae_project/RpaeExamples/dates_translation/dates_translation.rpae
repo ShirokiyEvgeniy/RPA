@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<recorder:ActionFlow xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:recorder="http://www.workfusion.com/recorder/v2.0.3">
+  <actions xsi:type="recorder:OpenURLAction" actionDetails="(https://translate.google.com/?sl)" comment="Opening google translate" url="https://translate.google.com/?sl">
+    <actions xsi:type="recorder:WebElementAction" actionDetails="(set by //*[@id=&quot;source&quot;] xpath)" comment="set text for translation" varName="str_google_translate" webElementLocator="//*[@id=&quot;source&quot;]" type="SET_VALUE"/>
+    <actions xsi:type="recorder:MouseClickAction" actionDetails="(click left button)" comment="selecting language" type="WEB_ELEMENT" webElementLocator="//*[@id=&quot;gt-tl-gms&quot;]/div[2]" button="1"/>
+    <actions xsi:type="recorder:KeyboardAction" actionDetails="(typed text)" comment="selecting German language" text="ger" type="KEY_TYPE"/>
+    <actions xsi:type="recorder:KeyboardAction" actionDetails="({ENTER})" text="{ENTER}" rawCode="10" keyCode="28" keyChar="13" keyLocation="4"/>
+  </actions>
+  <actions xsi:type="recorder:BaseNestedAction" actionDetails="Formatting date to different locales" comment="And pushing each day name to a List" groupName="Formatting date to different locales">
+    <actions xsi:type="recorder:ConstantValueAction" actionDetails="(to 'current_date' = 2018-04-30) - DATE" varName="current_date" stringValue="" dateTimeValue="2018-04-30T12:30:33+03:00[Europe/Minsk]"/>
+    <actions xsi:type="recorder:DateFormatAction" actionDetails="" targetVariable="str_date" direction="TYPE_TO_STRING" inputMask="MMMM" inputLocale="en-US" outputMask="EEEE" outputLocale="en-US" input="current_date"/>
+    <actions xsi:type="recorder:ExpressionValueAction" actionDetails="(to 'list_dates')" varName="list_dates">
+      <bigDecimalExpressionHandler/>
+      <listExpressionHandler targetVarName="str_date"/>
+      <tableExpressionHandler/>
+    </actions>
+    <actions xsi:type="recorder:DateFormatAction" actionDetails="" targetVariable="str_date" direction="TYPE_TO_STRING" inputMask="MMMM" inputLocale="en-US" outputMask="EEEE" outputLocale="de-DE" input="current_date"/>
+    <actions xsi:type="recorder:ExpressionValueAction" actionDetails="(to 'list_dates')" varName="list_dates">
+      <bigDecimalExpressionHandler/>
+      <listExpressionHandler targetVarName="str_date"/>
+      <tableExpressionHandler/>
+    </actions>
+    <actions xsi:type="recorder:DateFormatAction" actionDetails="" targetVariable="str_date" direction="TYPE_TO_STRING" inputMask="MMMM" inputLocale="en-US" outputMask="EEEE" outputLocale="ja-JP" input="current_date"/>
+    <actions xsi:type="recorder:ExpressionValueAction" actionDetails="(to 'list_dates')" varName="list_dates">
+      <bigDecimalExpressionHandler/>
+      <listExpressionHandler targetVarName="str_date"/>
+      <tableExpressionHandler/>
+    </actions>
+    <actions xsi:type="recorder:DateFormatAction" actionDetails="" targetVariable="str_date" direction="TYPE_TO_STRING" inputMask="MMMM" inputLocale="en-US" outputMask="EEEE" outputLocale="zh-CN" input="current_date"/>
+    <actions xsi:type="recorder:ExpressionValueAction" actionDetails="(to 'list_dates')" varName="list_dates">
+      <bigDecimalExpressionHandler/>
+      <listExpressionHandler targetVarName="str_date"/>
+      <tableExpressionHandler/>
+    </actions>
+    <actions xsi:type="recorder:DateFormatAction" actionDetails="" targetVariable="str_date" direction="TYPE_TO_STRING" inputMask="MMMM" inputLocale="en-US" outputMask="EEEE" outputLocale="hi-IN" input="current_date"/>
+    <actions xsi:type="recorder:ExpressionValueAction" actionDetails="(to 'list_dates')" varName="list_dates">
+      <bigDecimalExpressionHandler/>
+      <listExpressionHandler targetVarName="str_date"/>
+      <tableExpressionHandler/>
+    </actions>
+    <actions xsi:type="recorder:DateFormatAction" actionDetails="" targetVariable="str_date" direction="TYPE_TO_STRING" inputMask="MMMM" inputLocale="en-US" outputMask="EEEE" outputLocale="da-DK" input="current_date"/>
+    <actions xsi:type="recorder:ExpressionValueAction" actionDetails="(to 'list_dates')" varName="list_dates">
+      <bigDecimalExpressionHandler/>
+      <listExpressionHandler targetVarName="str_date"/>
+      <tableExpressionHandler/>
+    </actions>
+    <actions xsi:type="recorder:DateFormatAction" actionDetails="" targetVariable="str_date" direction="TYPE_TO_STRING" inputMask="MMMM" inputLocale="en-US" outputMask="EEEE" outputLocale="da-DK" input="current_date"/>
+  </actions>
+  <actions xsi:type="recorder:LaunchAppAction" actionDetails="(notepad.exe; wait for 0ms; poll every 0ms)" command="notepad.exe"/>
+  <actions xsi:type="recorder:KeyboardAction" actionDetails="(from variable 'message')" varName="message" type="TEXT_FROM_VAR"/>
+  <actions xsi:type="recorder:KeyboardAction" actionDetails="({ENTER})" text="{ENTER}" rawCode="10" keyCode="28" keyChar="13" keyLocation="4"/>
+  <actions xsi:type="recorder:KeyboardAction" actionDetails="({ENTER})" text="{ENTER}" rawCode="10" keyCode="28" keyChar="13" keyLocation="4"/>
+  <actions xsi:type="recorder:KeyboardAction" actionDetails="(from variable 'list_dates')" comment="printing date translations" varName="list_dates" type="TEXT_FROM_VAR"/>
+  <actions xsi:type="recorder:WaitAction" actionDetails="for 3000 ms" delay="3000"/>
+  <variables>
+    <variable name="str_date" value=""/>
+    <variable name="current_date" type="DATE" value="2018-05-04T12:04:52+03:00[Europe/Minsk]"/>
+    <variable name="str_google_translate" value="Monday"/>
+    <variable name="list_dates" type="LIST" value="[]"/>
+    <variable name="message" value="You don't need Google Translate anymore!"/>
+  </variables>
+</recorder:ActionFlow>

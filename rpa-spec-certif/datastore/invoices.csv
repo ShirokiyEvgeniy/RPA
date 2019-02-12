@@ -1,0 +1,4 @@
+invoice_id,client,group,payment_method,discount_percent,invoice_terms
+10001,Apple ,Invoice Default,Paypal,5,Urgent! Please process with priority
+10002,IBM,Invoice Default,Paypal,7,Process during current week
+10003,Amazon,Invoice Default,Paypal,10,Pre-order for December

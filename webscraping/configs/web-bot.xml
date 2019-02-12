@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://web-harvest.sourceforge.net/schema/1.0/config" scriptlang="groovy">
+
+	<var-def name="link"></var-def>
+
+	<var-def name="mainLink">https://www.athome.com</var-def>
+	<var-def name="baseLink">https://www.athome.com/store-find-all/</var-def>
+
+	<script><![CDATA[ 
+		resultList = new ArrayList();
+	]]></script>
+
+	<var-def name="allLocations">
+		<xpath expression="//table[@id = 'store-location-results']">
+			<html-to-xml>
+				<http url="${baseLink}" />
+			</html-to-xml>
+		</xpath>
+	</var-def>
+
+	<while condition="true" maxloops="50" index="i" empty="false">
+		<var-def name="locationTR">
+			<xpath expression="//tr[${i.toInt()}]">
+				&lt;?xml version="1.0"?&gt;
+				<template>${allLocations}</template>
+			</xpath>
+		</var-def>
+		<var-def name="address">
+			<to-text parser="org.apache.tika.parser.html.HtmlParser">
+				<xpath expression="//td[@class='store-address']/span[@class='store-address-1']">
+					&lt;?xml version="1.0"?&gt;
+					<template>${locationTR}</template>
+				</xpath>
+			</to-text>
+		</var-def>
+		<var-def name="city">
+			<to-text parser="org.apache.tika.parser.html.HtmlParser">
+				<xpath expression="//td[@class='store-address']/span[@class='store-city']">
+					&lt;?xml version="1.0"?&gt;
+					<template>${locationTR}</template>
+				</xpath>
+			</to-text>
+		</var-def>
+		<var-def name="phone">
+			<to-text parser="org.apache.tika.parser.html.HtmlParser">
+				<xpath expression="//td[@class='store-address']/div[@class='store-phone']">
+					&lt;?xml version="1.0"?&gt;
+					<template>${locationTR}</template>
+				</xpath>
+			</to-text>
+		</var-def>
+		<var-def name="locationName">
+			<to-text parser="org.apache.tika.parser.html.HtmlParser">
+				<xpath expression="//td[@class='store-information']/div[@class='store-name']/span[@class='store-location-id']/a">
+					&lt;?xml version="1.0"?&gt;
+					<template>${locationTR}</template>
+				</xpath>
+			</to-text>
+		</var-def>
+		<var-def name="link">
+			<regexp>
+				<regexp-pattern>
+					href="[\w-\/?=_]+"
+				</regexp-pattern>
+				<regexp-source>
+					<xpath expression="//td[@class='store-information']/div[@class='store-name']/span[@class='store-location-link']/a">
+						&lt;?xml version="1.0"?&gt;
+						<template>${locationTR}</template>
+					</xpath>
+				</regexp-source>
+			</regexp>
+		</var-def>
+		<script><![CDATA[ 
+			link = link.toString().replace("href=", "")
+			link = mainLink.toString() + link.replaceAll("\"", "")
+			city = city.toString().replaceAll("\\d", "")
+			println locationName
+			println address
+			println city
+			println phone
+			println link
+			
+			Map exportMap = new HashMap();
+			exportMap.put("locationName", locationName)
+			exportMap.put("address", address)
+			exportMap.put("city", city)
+			exportMap.put("phone", phone)
+			exportMap.put("link", link)
+			
+			resultList.add(exportMap)
+		]]></script>
+	</while>
+	
+	<script><![CDATA[ 
+		sys.defineVariable("resultList", resultList)
+	]]></script>
+   
+	<export include-original-data="false">
+	    <multi-column list="${resultList}" split-results="true">
+	        <put-to-column-getter name="locationName" property="locationName" />
+	        <put-to-column-getter name="address" property="address" />
+	        <put-to-column-getter name="city" property="city" />
+	        <put-to-column-getter name="phone" property="phone" />
+	        <put-to-column-getter name="link" property="link" />
+	        <put-to-column-getter name="id" property="id" />
+	    </multi-column>
+	</export>
+</config>

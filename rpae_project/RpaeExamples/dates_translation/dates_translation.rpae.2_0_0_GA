@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<recorder:ActionFlow xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:recorder="http://www.workfusion.com/recorder/v2.0.0" ignoreDelays="false">
+  <variables>
+    <variable name="str_date" type="STRING" value=""/>
+    <variable name="current_date" type="DATE" value="2018-05-04T12:04:52+03:00[Europe/Minsk]"/>
+    <variable name="str_google_translate" type="STRING" value="Monday"/>
+    <variable name="list_dates" type="LIST" value="[]"/>
+    <variable name="message" type="STRING" value="You don't need Google Translate anymore!"/>
+  </variables>
+  <actions xsi:type="recorder:OpenURLAction" active="true" actionDetails="(https://translate.google.com/?sl)" delay="0" comment="Opening google translate" url="https://translate.google.com/?sl">
+    <actions xsi:type="recorder:WebElementAction" active="true" actionDetails="(set by //*[@id=&quot;source&quot;] xpath)" delay="0" comment="set text for translation" varName="str_google_translate" webElementLocator="//*[@id=&quot;source&quot;]" searchInFrames="false" webElementLocatorType="XPATH" exactMatch="true" type="SET_VALUE" useElementAttribute="false"/>
+    <actions xsi:type="recorder:MouseClickAction" active="true" actionDetails="(click left button)" delay="0" comment="selecting language" type="WEB_ELEMENT" webElementLocator="//*[@id=&quot;gt-tl-gms&quot;]/div[2]" searchInFrames="false" webElementLocatorType="XPATH" exactMatch="true" button="1"/>
+    <actions xsi:type="recorder:KeyboardAction" active="true" actionDetails="(typed text)" delay="0" comment="selecting German language" text="ger" type="KEY_TYPE"/>
+    <actions xsi:type="recorder:KeyboardAction" active="true" actionDetails="({ENTER})" delay="0" text="{ENTER}" rawCode="10" keyCode="28" keyChar="13" keyLocation="4"/>
+  </actions>
+  <actions xsi:type="recorder:BaseNestedAction" active="true" actionDetails="Formatting date to different locales" delay="0" comment="And pushing each day name to a List" groupName="Formatting date to different locales">
+    <actions xsi:type="recorder:ConstantValueAction" active="true" actionDetails="(to 'current_date' = 2018-04-30) - DATE" delay="0" varName="current_date" stringValue="" numberValue="0" booleanValue="false" dateTimeValue="2018-04-30T12:30:33+03:00[Europe/Minsk]" useCurrentDate="false"/>
+    <actions xsi:type="recorder:DateFormatAction" active="true" actionDetails="" delay="0" targetVariable="str_date" direction="TYPE_TO_STRING" input="current_date" inputMask="MMMM" inputLocale="en-US" outputMask="EEEE" outputLocale="en-US"/>
+    <actions xsi:type="recorder:ExpressionValueAction" active="true" actionDetails="(to 'list_dates')" delay="0" varName="list_dates">
+      <bigDecimalExpressionHandler/>
+      <listExpressionHandler operationType="PUSH" targetVarName="str_date"/>
+      <tableExpressionHandler operationType="PUSH" tablePushType="AS_ROW"/>
+    </actions>
+    <actions xsi:type="recorder:DateFormatAction" active="true" actionDetails="" delay="0" targetVariable="str_date" direction="TYPE_TO_STRING" input="current_date" inputMask="MMMM" inputLocale="en-US" outputMask="EEEE" outputLocale="de-DE"/>
+    <actions xsi:type="recorder:ExpressionValueAction" active="true" actionDetails="(to 'list_dates')" delay="0" varName="list_dates">
+      <bigDecimalExpressionHandler/>
+      <listExpressionHandler operationType="PUSH" targetVarName="str_date"/>
+      <tableExpressionHandler operationType="PUSH" tablePushType="AS_ROW"/>
+    </actions>
+    <actions xsi:type="recorder:DateFormatAction" active="true" actionDetails="" delay="0" targetVariable="str_date" direction="TYPE_TO_STRING" input="current_date" inputMask="MMMM" inputLocale="en-US" outputMask="EEEE" outputLocale="ja-JP"/>
+    <actions xsi:type="recorder:ExpressionValueAction" active="true" actionDetails="(to 'list_dates')" delay="0" varName="list_dates">
+      <bigDecimalExpressionHandler/>
+      <listExpressionHandler operationType="PUSH" targetVarName="str_date"/>
+      <tableExpressionHandler operationType="PUSH" tablePushType="AS_ROW"/>
+    </actions>
+    <actions xsi:type="recorder:DateFormatAction" active="true" actionDetails="" delay="0" targetVariable="str_date" direction="TYPE_TO_STRING" input="current_date" inputMask="MMMM" inputLocale="en-US" outputMask="EEEE" outputLocale="zh-CN"/>
+    <actions xsi:type="recorder:ExpressionValueAction" active="true" actionDetails="(to 'list_dates')" delay="0" varName="list_dates">
+      <bigDecimalExpressionHandler/>
+      <listExpressionHandler operationType="PUSH" targetVarName="str_date"/>
+      <tableExpressionHandler operationType="PUSH" tablePushType="AS_ROW"/>
+    </actions>
+    <actions xsi:type="recorder:DateFormatAction" active="true" actionDetails="" delay="0" targetVariable="str_date" direction="TYPE_TO_STRING" input="current_date" inputMask="MMMM" inputLocale="en-US" outputMask="EEEE" outputLocale="hi-IN"/>
+    <actions xsi:type="recorder:ExpressionValueAction" active="true" actionDetails="(to 'list_dates')" delay="0" varName="list_dates">
+      <bigDecimalExpressionHandler/>
+      <listExpressionHandler operationType="PUSH" targetVarName="str_date"/>
+      <tableExpressionHandler operationType="PUSH" tablePushType="AS_ROW"/>
+    </actions>
+    <actions xsi:type="recorder:DateFormatAction" active="true" actionDetails="" delay="0" targetVariable="str_date" direction="TYPE_TO_STRING" input="current_date" inputMask="MMMM" inputLocale="en-US" outputMask="EEEE" outputLocale="da-DK"/>
+    <actions xsi:type="recorder:ExpressionValueAction" active="true" actionDetails="(to 'list_dates')" delay="0" varName="list_dates">
+      <bigDecimalExpressionHandler/>
+      <listExpressionHandler operationType="PUSH" targetVarName="str_date"/>
+      <tableExpressionHandler operationType="PUSH" tablePushType="AS_ROW"/>
+    </actions>
+    <actions xsi:type="recorder:DateFormatAction" active="true" actionDetails="" delay="0" targetVariable="str_date" direction="TYPE_TO_STRING" input="current_date" inputMask="MMMM" inputLocale="en-US" outputMask="EEEE" outputLocale="da-DK"/>
+  </actions>
+  <actions xsi:type="recorder:LaunchAppAction" active="true" actionDetails="(notepad.exe; wait for 0ms; poll every 0ms)" delay="0" command="notepad.exe" autoDetectWindow="true"/>
+  <actions xsi:type="recorder:KeyboardAction" active="true" actionDetails="(from variable 'message')" delay="0" varName="message" type="TEXT_FROM_VAR"/>
+  <actions xsi:type="recorder:KeyboardAction" active="true" actionDetails="({ENTER})" delay="0" text="{ENTER}" rawCode="10" keyCode="28" keyChar="13" keyLocation="4"/>
+  <actions xsi:type="recorder:KeyboardAction" active="true" actionDetails="({ENTER})" delay="0" text="{ENTER}" rawCode="10" keyCode="28" keyChar="13" keyLocation="4"/>
+  <actions xsi:type="recorder:KeyboardAction" active="true" actionDetails="(from variable 'list_dates')" delay="0" comment="printing date translations" varName="list_dates" type="TEXT_FROM_VAR"/>
+  <actions xsi:type="recorder:WaitAction" active="true" actionDetails="for 3000 ms" delay="3000"/>
+</recorder:ActionFlow>

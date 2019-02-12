@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://web-harvest.sourceforge.net/schema/1.0/config" scriptlang="groovy">
+
+	<script><![CDATA[ 
+		resultList = new ArrayList()
+	]]></script>
+
+	<robotics-flow>
+		<robot name="roboticsDriver" driver="chrome" close-on-completion="true" start-in-private="true">
+			<script><![CDATA[ 
+				import com.google.gson.Gson
+				import com.google.gson.GsonBuilder
+				timeouts(40 * 1000)
+				WebDriverWait wait = new WebDriverWait(driver(), 20)
+				open("https://www.ebay.com/")
+				$(byXpath("//span[text()='Выбран язык: Русский']")).click()
+				$(byXpath("//span[text()='English']")).click()
+				sleep(1000)
+				$(byXpath("//input[contains(@placeholder, 'Search')]")).waitUntil(VISIBLE).val("fridge")
+				$(byXpath("//input[@type='submit']")).click()
+				$(byXpath("//span[text()='Выбран язык: Русский']")).click()
+				$(byXpath("//span[text()='English']")).click()
+				liXpath = "//ul[contains(@class, 'results')]/li"
+				$(byXpath("//input[@type='checkbox'][@aria-label='New']/..")).click()
+				wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("${liXpath}[1]//h3")))
+				for (int j = 0; j < 3; j++) {
+					for (int i = 0; i < 10; i++) {
+						fridge = $(byXpath("${liXpath}[${i+1}]//h3"))
+						link = $(byXpath("${liXpath}[${i+1}]//a[contains(@class, 'link')]")).getAttribute("href")
+						log.error("/////////////////")
+						log.error(link)
+						actions().moveToElement(fridge)
+		                         .keyDown(Keys.CONTROL)
+		                         .click(fridge)
+		                         .keyUp(Keys.CONTROL)
+		                         .perform()
+		                sleep(1000)
+		                tabs = new ArrayList (driver().getWindowHandles())
+			            switchTo().window(tabs.get(1))
+						name = $(byTagName("h1")).getText()
+						log.error(name)
+						approvement = ""
+						feedbackPercent = 0.0
+						try {
+							feedback = $(byXpath("//div[contains(text(), 'feedback')]")).getText()
+							feedbackPercent = Double.parseDouble(feedback.substring(0, feedback.indexOf("%")))
+						} catch (Exception e) {
+							println ("Error: no seller information")
+						}
+						shipping = ""
+						try {
+							shipping = $(byXpath("//span[@id='fshippingCost']")).getText().trim().toLowerCase()
+						} catch (Exception e) {
+							shipping = "No shipping"
+						}
+						if (feedbackPercent > 99 && shipping.equals("free")) {
+							approvement += "approved"
+						} else {
+							approvement += "disapproved"
+						}
+						
+						trXpath = "//div[contains(@class, 'itemAttr')]//table//tr"
+						trs = $$(byXpath(trXpath)).size()
+						specifics = ""
+						for(int i_tr = 1; i_tr <= trs; i_tr++) {
+							tdXpath = "${trXpath}[${i_tr}]/td"
+							tds = $$(byXpath(tdXpath)).size()
+							boolean flag = false
+							boolean body = false
+							for(int i_td = 1; i_td <= tds; i_td++) {
+								if (flag) {
+									$(byXpath("${tdXpath}[${i_td}]//span[@id='readFull']/a")).click()
+									specifics += $(byXpath("${tdXpath}[${i_td}]//div")).getText().trim().replaceAll("See all condition definitions", "")
+									specifics += " | "
+									flag = false
+									body = false	
+								} else if (body) {
+									specifics += $(byXpath("${tdXpath}[${i_td}]/*")).getText()
+									specifics += " | "
+									body = false
+								} else {
+									if ($(byXpath("${tdXpath}[${i_td}]")).getText().contains("Condition:")) {
+										flag = true
+									}
+									wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("${tdXpath}[${i_td}]")))
+									specifics += $(byXpath("${tdXpath}[${i_td}]")).getText()
+									body = true
+								}
+							}
+						}
+						
+						Map map = new HashMap()
+						map.put("name", name)
+						map.put("specifics", specifics)
+						map.put("approvement", approvement)
+						map.put("link", link)
+						
+						Gson gson = new GsonBuilder().create()
+						jsonValue = gson.toJson(map)
+						resultList.add(jsonValue)
+						
+						driver().close()
+                		switchTo().window(tabs.get(0))
+					}
+					$(byXpath("//a[@rel='next']")).click()
+				}
+			]]></script>
+		</robot>
+	</robotics-flow>
+
+	<var-def name="excelLink">
+		<s3 bucket="wf-vr-training">
+			<s3-put path="temp.bucket/YauheniShyroki/${'keds ' + new java.util.Date().toString() + '.xlsx'}"  acl="PublicRead" content-type="application/vnd.ms-excel">
+                <list-to-excel>
+                	<template>${resultList.toString()}</template>
+                </list-to-excel>
+            </s3-put>
+		</s3>
+	</var-def>
+
+    <export include-original-data="false">
+    	<single-column name="link" value="${excelLink}" />
+    </export>
+
+</config>

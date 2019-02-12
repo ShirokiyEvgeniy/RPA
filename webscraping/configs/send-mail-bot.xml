@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://web-harvest.sourceforge.net/schema/1.0/config" scriptlang="groovy">
+
+	<mail from="test.yauheni.shyroki@gmail.com" smtp-host="smtp.gmail.com" to="tuk.tuk.rpa@gmail.com" type="html" username="test.yauheni.shyroki@gmail.com" password="QWERTYasdfgh1998" security="ssl" subject="Assignment 3. Yauheni Shyroki">
+    	<template>${applicationHost}/workfusion/secure/business-process/edit/${item.getWrappedObject().getRun().getRootRunUuid()}</template>
+	</mail>
+
+    
+    
+</config>

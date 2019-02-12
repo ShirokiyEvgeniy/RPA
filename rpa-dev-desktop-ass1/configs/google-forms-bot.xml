@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://web-harvest.sourceforge.net/schema/1.0/config" scriptlang="groovy">
+
+	<robotics-flow>
+		<robot driver="chrome" close-on-completion="false" maximize-on-startup="true" name="webDr" start-in-private="true">
+			<script><![CDATA[
+				timeouts(30 * 1000)
+				
+				WebDriverWait wait = new WebDriverWait(driver(), 20)
+				open("https://docs.google.com/forms/u/0/")
+				
+				$(byXpath("//input[@type='email']")).waitUntil(VISIBLE).val("test.yauheni.shyroki@gmail.com")
+				$(byXpath("//div[@id='identifierNext']")).click()
+				$(byXpath("//input[@type='password']")).waitUntil(VISIBLE)
+				$(byXpath("//input[@type='password']")).val("QWERTYasdfgh1998")
+				$(byXpath("//div[@id='passwordNext']")).click()				
+				
+				wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@id=':2f']")))
+				$(byXpath("//div[@id=':2f']")).click()
+				
+				wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//textarea[@aria-label='Название формы']")))
+				
+				description = $(byXpath("//textarea[@aria-label='Описание']"))
+				description.click()
+				sleep(1000)
+				description.val("This is description for assignment 1")
+				
+				$(byXpath("//div[@aria-label='Добавить изображение']")).click()
+				
+				driver().switchTo().frame(($(byXpath("//div/iframe[@id]")).toWebElement()))
+			
+				wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[text()='Выберите изображение для загрузки']")))
+				$(byXpath("//div[text()='Выберите изображение для загрузки']")).click()
+				
+			]]></script>
+		</robot>
+		
+		<robot driver="desktop" close-on-completion="false">
+			<script><![CDATA[ 
+				def picturePath = "http://educatecnia.com/images/lms.jpg"
+				pic = downloadFileOnAgent(picturePath)
+				window("[TITLE:Открытие]")
+				editPath = $("[CLASS:Edit]")
+				editPath.clear()
+				editPath.sendKeys("${pic}")
+				sendKeys(Keys.ENTER)
+				sleep(4000)
+				deleteFileOnAgent("${pic}")
+			]]></script>
+		</robot>
+		
+		<robot driver="chrome" close-on-completion="true" name="webDr">
+			<script><![CDATA[
+				WebDriverWait wait = new WebDriverWait(driver(), 20)
+				driver().switchTo().defaultContent()
+				sleep(1000)
+			
+				driver().switchToRootWindow()
+				$(byXpath("//span[text()='Отправить']")).click()
+				wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@aria-label='Кому']")))
+				$(byXpath("//input[@aria-label='Кому']")).val("test.yauheni.shyroki@gmail.com")
+				$(byXpath("//div[@aria-label='Включить форму в сообщение электронной почты']")).click()
+				$(byCssSelector("div.freebirdFormeditorDialogSendformButtonRow:nth-child(2) > div:nth-child(2)")).click()				
+				sleep(1000)
+				
+				open("https://mail.google.com/mail/u/0/")
+				wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[contains(text(), 'Контактная')]/ancestor::tr/td[6]")))
+				$(byXpath("//span[contains(text(), 'Контактная')]/ancestor::tr/td[6]")).click()
+				sleep(1000)
+				screen = driver().getScreenshotAs(OutputType.BYTES)
+			]]></script>
+			
+			<var-def name="screenLink">
+		        <s3 bucket='wf-vr-training'>
+		            <s3-put path="temp.bucket/YauheniShyroki/${'mailScreen ' + sys.date() + sys.time() + '.png'}"  acl="PublicRead">
+		                <script return="screen"/>
+		            </s3-put>
+		        </s3>
+		    </var-def>
+		</robot>
+	</robotics-flow>
+
+    <export include-original-data="false">
+    	<single-column name="link" value="${screenLink}" />
+    </export>
+
+</config>

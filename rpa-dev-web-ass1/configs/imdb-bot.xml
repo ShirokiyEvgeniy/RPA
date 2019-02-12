@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://web-harvest.sourceforge.net/schema/1.0/config" scriptlang="groovy">
+
+	<robotics-flow>
+      	<capability name="platform" value="WINDOWS"/>
+		<robot name="roboticsDriver" driver="chrome" close-on-completion="true" start-in-private="true">
+			<script><![CDATA[ 
+				timeouts(20 * 1000)
+				htmlFile =  "<table border='1' cellspacing='2' cellpadding='2' width='100%'>" +
+							"<tr>" +
+							"<th style='width: 10%'>Film name</th>" +
+							"<th style='width: 5%'>Year</th>" +
+							"<th style='width: 10%'>Director</th>" +
+							"<th style='width: 5%'>Rating</th>" +
+							"<th style='width: 5%'>Starts</th>" +
+							"<th style='width: 20%'>Gross Boxoffice</th>" +
+							"<th style='width: 30%'>Short Storyline</th>" +
+							"<th style='width: 15%'>Link to picture poster</th>" +
+							"</tr>"
+				
+				open("https://www.imdb.com/")
+			]]></script>
+			<loop item="film">
+				<list>
+					<datastore name="films">
+						select * from @this
+					</datastore>
+				</list>
+				<body>
+					<script><![CDATA[
+						import java.util.function.Consumer; 
+						filmName = film.get("film").toString()
+						log.error(filmName)
+						$(byId("navbar-query")).clear()
+						$(byId("navbar-query")).val(filmName)
+						findButton = $(byId("navbar-submit-button"))
+						actions().moveToElement(findButton)
+		                         .keyDown(Keys.CONTROL)
+		                         .click(findButton)
+		                         .keyUp(Keys.CONTROL)
+		                         .perform()
+		                         
+		                sleep(1000)
+		                
+		                tabs = new ArrayList (driver().getWindowHandles())
+		                switchTo().window(tabs.get(1))
+						sleep(1000)
+						href = $(byXpath("//table[@class='findList']//td[@class='result_text']/a")).getAttribute("href")
+						open(href)
+						year = $(byXpath("//span[@id='titleYear']/a")).waitUntil(VISIBLE).getText()
+						director = $(byXpath("//h4[contains(text(), 'Director:')]/../a")).getText()
+						stars = $(byXpath("//div[@class='ratingValue']//span")).getText()
+						rating = $(byXpath("//div[@class='txt-block']/span[preceding-sibling::h4][following-sibling::span]")).getText()
+						gross = ""
+						Consumer<UiElement> cons = new Consumer<UiElement>() {
+							public void accept(UiElement el) {
+						        gross += el.getText() + "<br>"
+						    }
+						};
+						$$(byXpath("//div[@id='titleDetails']/div[preceding-sibling::h3[text()='Box Office']][following-sibling::span]")).forEach(cons)
+			
+						storyline = $(byXpath("//div[@id='titleStoryLine']/div[1]/p/span")).getText()
+						linkToPoster = $(byXpath("//div[@class='poster']/a/img")).getAttribute("src")
+					
+						htmlFile += "<tr>" +
+									"<td>" + filmName + "</td>" +
+									"<td>" + year + "</td>" +
+									"<td>" + director + "</td>" +
+									"<td>" + rating + "</td>" +
+									"<td>" + stars + "</td>" +
+									"<td>" + gross + "</td>" +
+									"<td>" + storyline + "</td>" +
+									"<td><a href='" + linkToPoster + "'>Poster link</a></td>" +
+									"</tr>"
+								
+						driver().close()
+                		switchTo().window(tabs.get(0))
+					]]></script>
+				</body>
+			</loop>
+			<script><![CDATA[ 
+				htmlFile += "</table>"
+				htmlFile = htmlFile.replaceAll("\"", "'")
+				open("https://accounts.google.com/signin/v2/identifier?continue=https%3A%2F%2Fmail.google.com%2Fmail%2F&service=mail&sacu=1&rip=1&flowName=GlifWebSignIn&flowEntry=ServiceLogin&hl=en-GB")
+				$(byXpath("//input[@type='email']")).waitUntil(VISIBLE).val("test.yauheni.shyroki@gmail.com")
+				$(byXpath("//span[text()='Next']")).click()
+				$(byXpath("//input[@type='password']")).waitUntil(VISIBLE)
+				$(byXpath("//input[@type='password']")).val("QWERTYasdfgh1998")
+				$(byXpath("//span[text()='Next']")).click()
+				sleep(1000)
+				open("https://mail.google.com/mail/u/0/#inbox?compose=new")
+				sleep(2000)
+				$(byXpath("//textarea[@name='to']")).waitUntil(VISIBLE)
+				$(byXpath("//textarea[@name='to']")).val("tuk.tuk.rpa@gmail.com")
+				$(byXpath("//input[@name='subjectbox']")).val("RPA Developer, Web Advanced, Assignment 1. Yauheni Shyroki")
+				mailBody = $(byXpath("//div[@aria-label='Message Body']"))
+				scriptStr = "var oldHtml = arguments[0].innerHTML; " +
+							"var newHtml = oldHtml + \"" + htmlFile + "\"; " +
+							"arguments[0].innerHTML = newHtml;"
+				executeJavaScript(scriptStr, mailBody)
+				
+				screen = driver().getScreenshotAs(OutputType.BYTES)
+				$(byXpath("//div[contains(text(), 'Send')]")).click()
+				sys.defineVariable("dateMail", sys.date())
+				sys.defineVariable("timeMail", sys.time())
+				
+				sleep(3000)
+			]]></script>
+		</robot>
+	</robotics-flow>
+
+	<var-def name="screenLink">
+        <s3 bucket='wf-vr-training'>
+            <s3-put path="YauheniShyroki/${'mail ' + new java.util.Date().toString() + '.png'}"  acl="PublicRead">
+                <script return="screen"/>
+            </s3-put>
+        </s3>
+    </var-def>
+
+    <export include-original-data="false">
+    	<single-column name="email_subject" value="RPA Developer, Web Advanced, Assignment 1. Yauheni Shyroki" />
+    	<single-column name="email_date" value="${dateMail}" />
+    	<single-column name="email_time" value="${timeMail}" />
+    	<single-column name="screenLink" value="${screenLink}" />
+    </export>
+</config>

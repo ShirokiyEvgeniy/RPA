@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://web-harvest.sourceforge.net/schema/1.0/config" scriptlang="groovy">
+
+	<script><![CDATA[ 
+		import org.apache.poi.ss.usermodel.Cell;
+        import org.apache.poi.ss.usermodel.Row;
+        import org.apache.poi.ss.usermodel.Sheet;
+        import org.apache.poi.ss.usermodel.Workbook;
+        import org.apache.poi.ss.util.CellReference;
+        import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+		
+		wb = new SXSSFWorkbook(100);
+        sh = wb.createSheet();
+        for(int rownum = 0; rownum < 200; rownum++){
+            Row row = sh.createRow(rownum);
+            for(int cellnum = 0; cellnum < 10; cellnum++){
+                Cell cell = row.createCell(cellnum);
+            }
+        }
+        
+        sh.getRow(0).getCell(0).setCellValue("City")
+		sh.getRow(0).getCell(1).setCellValue("State")
+		sh.getRow(0).getCell(2).setCellValue("Temperature in Celsius")
+		sh.getRow(0).getCell(3).setCellValue("Pressure in hPa")
+		sh.getRow(0).getCell(4).setCellValue("Humidity in %")
+		sh.getRow(0).getCell(5).setCellValue("Wind speed in meter/sec")
+		sh.getRow(0).getCell(6).setCellValue("Longitude")
+		sh.getRow(0).getCell(7).setCellValue("Latitude")
+		sh.getRow(0).getCell(8).setCellValue("Population")
+		sh.getRow(0).getCell(9).setCellValue("Time of response")
+	]]></script>
+
+	<var-def name="JsonCities">
+		<json>
+			<http url="http://db1.epmc-iacc.projects.epam.com:8080/wf-vr-training/temp.bucket/YauheniShyroki/cities.json" />
+		</json>
+	</var-def>
+
+	<script><![CDATA[			
+		def slurper = new groovy.json.JsonSlurper()
+ 		def cities = slurper.parseText(JsonCities.toString())
+  		Collections.sort(cities, new Comparator() {
+  			int compare(c1, c2) {
+  				return Integer.parseInt(c2.population).compareTo(Integer.parseInt(c1.population))
+  			}
+  		});
+  		sys.defineVariable("cities", cities) 		
+	]]></script>
+	
+	<while condition="true" index="i" maxloops="5">
+		<var-def name="JsonResponse">
+			<json>
+				<http url="https://api.openweathermap.org/data/2.5/find?lat=${cities.getWrappedObject()[i.toInt() - 1].getWrappedObject().latitude}&amp;lon=${cities.getWrappedObject()[i.toInt() - 1].getWrappedObject().longitude}&amp;cnt=1&amp;appid=6fbf3ecad532062c702c114fb5e9a5a2" />
+			</json>
+		</var-def>
+	
+		<script><![CDATA[
+			import java.math.RoundingMode;
+			import java.math.BigDecimal;
+			import com.google.gson.Gson
+			import com.google.gson.GsonBuilder
+			def slurper = new groovy.json.JsonSlurper()
+ 			def response = slurper.parseText(JsonResponse.toString())
+ 			
+ 			Map map = new HashMap()
+ 			println "-------------${i}----------------"
+ 			//sh.getRow(i).getCell(i).setCellValue(value)
+ 			/*map.put("Time of response", sys.datetime("EEE, dd MMM yyyy HH:mm:ss zzz"))
+ 			map.put("Temperature in Celsius", String.format("%.2f", ((Double)response.list[0].main.temp - 273.15)))
+ 			map.put("Pressure in hPa", Integer.toString(response.list[0].main.pressure))
+ 			map.put("Humidity in %", Integer.toString(response.list[0].main.humidity))
+ 			map.put("Wind speed in meter/sec", response.list[0].wind.speed.toString())
+ 			map.put("City", cities.getWrappedObject()[i.toInt() - 1].getWrappedObject().city)
+ 			map.put("Longitude", cities.getWrappedObject()[i.toInt() - 1].getWrappedObject().longitude.toString())
+ 			map.put("Latitude", cities.getWrappedObject()[i.toInt() - 1].getWrappedObject().latitude.toString())
+ 			map.put("Population", cities.getWrappedObject()[i.toInt() - 1].getWrappedObject().population)
+ 			map.put("State", cities.getWrappedObject()[i.toInt() - 1].getWrappedObject().state)*/
+ 			
+ 			sh.getRow(i.toInt()).getCell(0).setCellValue(cities.getWrappedObject()[i.toInt() - 1].getWrappedObject().city)
+ 			sh.getRow(i.toInt()).getCell(1).setCellValue(cities.getWrappedObject()[i.toInt() - 1].getWrappedObject().state)
+ 			sh.getRow(i.toInt()).getCell(2).setCellValue(String.format("%.2f", ((Double)response.list[0].main.temp - 273.15)))
+ 			sh.getRow(i.toInt()).getCell(3).setCellValue(Integer.toString(response.list[0].main.pressure))
+ 			sh.getRow(i.toInt()).getCell(4).setCellValue(Integer.toString(response.list[0].main.humidity))
+ 			sh.getRow(i.toInt()).getCell(5).setCellValue(response.list[0].wind.speed.toString())
+ 			sh.getRow(i.toInt()).getCell(6).setCellValue(cities.getWrappedObject()[i.toInt() - 1].getWrappedObject().longitude.toString())
+ 			sh.getRow(i.toInt()).getCell(7).setCellValue(cities.getWrappedObject()[i.toInt() - 1].getWrappedObject().latitude.toString())
+ 			sh.getRow(i.toInt()).getCell(8).setCellValue(cities.getWrappedObject()[i.toInt() - 1].getWrappedObject().population)
+ 			sh.getRow(i.toInt()).getCell(9).setCellValue(sys.datetime("EEE, dd MMM yyyy HH:mm:ss zzz"))
+ 			
+ 			
+ 			
+ 			/*Gson gson = new GsonBuilder().create()
+			jsonValue = gson.toJson(map)
+			result.add(jsonValue)
+ 			println map*/
+ 			
+ 			
+ 			if (i.toInt() % 60 == 0) {
+ 				try {
+					Thread.sleep(60 * 1000)
+				} catch (Exception e) {
+					e.printStackTrace()
+				}
+ 			}
+		]]></script>
+	</while>
+	
+	
+	
+	<var-def name="excelLink">
+		<s3 bucket="wf-vr-training">
+			<s3-put path="temp.bucket/YauheniShyroki/${'weather ' + new java.util.Date().toString() + '.xlsx'}"  acl="PublicRead" content-type="application/vnd.ms-excel">
+                <list-to-excel>
+                	<template>${result.toString()}</template>
+                </list-to-excel>
+            </s3-put>
+		</s3>
+	</var-def>
+
+    <export include-original-data="false">
+    	<single-column name="excelLink" value="${excelLink}" />
+    </export>
+
+</config>
